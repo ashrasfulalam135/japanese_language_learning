@@ -47,7 +47,7 @@ Completed in Sprint 1:
 ---
 
 ## Architecture
-
+```
 jlpt-study-app/
 │
 ├── app.py                 # Streamlit entry point
@@ -65,7 +65,7 @@ jlpt-study-app/
 ├── pages/                 # Streamlit multi-page content
 ├── tests/                 # Unit tests (future)
 └── .github/workflows/     # CI/CD pipeline
-
+```
 ---
 
 **Flow:**
