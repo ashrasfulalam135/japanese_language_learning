@@ -50,21 +50,21 @@ Completed in Sprint 1:
 
 jlpt-study-app/
 │
-├── app.py # Streamlit entry point
-├── config.py # Environment variables
-├── requirements.txt # Python dependencies
+├── app.py                 # Streamlit entry point
+├── config.py              # Environment variables
+├── requirements.txt       # Python dependencies
 ├── database/
-│ ├── db.py # SQLAlchemy engine/session
-│ ├── models.py # Base models
-│ └── **init**.py
+│   ├── db.py              # SQLAlchemy engine/session
+│   ├── models.py          # Base models
+│   └── __init__.py
 ├── scripts/
-│ ├── init_db.py # DB initialization script
-│ └── **init**.py
-├── modules/ # Feature modules (lessons, flashcards, etc.)
-├── auth/ # Authentication modules (Sprint 2)
-├── pages/ # Streamlit multi-page content
-├── tests/ # Unit tests (future)
-└── .github/workflows/ # CI/CD pipeline
+│   ├── init_db.py         # DB initialization script
+│   └── __init__.py
+├── modules/               # Feature modules (lessons, flashcards, etc.)
+├── auth/                  # Authentication modules (Sprint 2)
+├── pages/                 # Streamlit multi-page content
+├── tests/                 # Unit tests (future)
+└── .github/workflows/     # CI/CD pipeline
 
 ---
 
