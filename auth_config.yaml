@@ -1,0 +1,62 @@
+cookie:
+  expiry_days: 1
+  key: bb6d718fbbc2af0aaed2c70ca1d11d69e6826abc15b7a7ec52730010be4aa48c
+  name: jlpt_auth_cookie
+credentials:
+  usernames:
+    admin@jlpt.local:
+      email: admin@jlpt.local
+      failed_login_attempts: 0
+      first_name: Admin
+      last_name: User
+      logged_in: false
+      password: $2b$12$icJOJWnFbKgqG7fuf0inDeXc3iStDZIMk68.0URyPUhg0WqI3Toeu
+      roles:
+      - admin
+      allowed_features:
+      - all
+      verified: true
+      verification_token: null
+      verification_expires_at: null
+    user1@jlpt.local:
+      email: user1@jlpt.local
+      failed_login_attempts: 0
+      first_name: User
+      last_name: One
+      logged_in: true
+      password: $2b$12$UpARM9pJdbGrspgv868wS.WUSCTMMvIw/3Glg36.5BgSgC.4Mz6Ou
+      roles:
+      - user
+      allowed_features: []
+      verified: true
+      verification_token: null
+      verification_expires_at: null
+    user2@jlpt.local:
+      email: user2@jlpt.local
+      failed_login_attempts: 0
+      first_name: User
+      last_name: Two
+      logged_in: false
+      password: $2b$12$JmINUStUvTp1UcXaYpcsh./4dLJ3xtTOIfAWn0q7wdPAEdVE6GYKq
+      roles:
+      - user
+      allowed_features: []
+      verified: true
+      verification_token: null
+      verification_expires_at: null
+    ashrafulalam135@gmail.com:
+      email: ashrafulalam135@gmail.com
+      logged_in: false
+      first_name: Ashraful
+      last_name: Alam
+      password: $2b$12$slfXDeCsxcsyHdJ29iN6P.d4Q0O8d2DKfUBBv4vx4wTeGWS0MVQa6
+      roles:
+      - admin
+      allowed_features:
+      - all
+      verified: true
+      verification_token: null
+      verification_expires_at: null
+      failed_login_attempts: 0
+pre-authorized:
+  emails: []
