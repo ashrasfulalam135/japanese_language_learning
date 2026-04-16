@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./jlpt.db")
 
 APP_ENV = os.getenv("APP_ENV")
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8501")

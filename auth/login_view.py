@@ -2,8 +2,34 @@ import streamlit as st
 
 
 def render_login_view(
-    authenticator, config: dict, get_user_record, clear_login_state, set_view
+    authenticator, config: dict, get_user_record, clear_login_state
 ) -> None:
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stForm"] {
+            padding: 1rem;
+        }
+        div[data-testid="stForm"] button[kind="secondaryFormSubmit"],
+        div[data-testid="stForm"] button[kind="primaryFormSubmit"],
+        div[data-testid="stForm"] div[data-testid="stFormSubmitButton"],
+        div[data-testid="stForm"]
+        div[data-testid="stFormSubmitButton"] > button {
+            width: 100%;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<h1 style='text-align: center;'>JLPT Study App</h1>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<h3 style='text-align: center;'>Login</h3>",
+        unsafe_allow_html=True,
+    )
+
     try:
         with st.form("login_form", clear_on_submit=True):
             email = st.text_input("Email", autocomplete="off")
@@ -23,9 +49,7 @@ def render_login_view(
                 password,
             ):
                 authenticator.cookie_controller.set_cookie()
-                cookie_is_set = authenticator.cookie_controller.get_cookie()
-                if authenticator.path and cookie_is_set:
-                    st.rerun()
+                st.switch_page("dashboard/dashboard_page.py")
     except Exception as exc:
         st.error(str(exc))
 
@@ -35,12 +59,12 @@ def render_login_view(
         type="tertiary",
         use_container_width=True,
     ):
-        set_view("register")
+        st.switch_page("auth/register_page.py")
 
     auth_status = st.session_state.get("authentication_status")
     if auth_status:
         username = st.session_state.get("username")
-        user_record = get_user_record(config, username)
+        user_record = get_user_record(username)
         is_verified = user_record.get("verified", True)
         if not is_verified:
             authenticator.logout(location="unrendered")

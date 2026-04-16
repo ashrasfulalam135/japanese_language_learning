@@ -1,10 +1,10 @@
 import streamlit as st
 
 
-def render_dashboard(config: dict, get_user_record) -> None:
+def render_dashboard(get_user_record) -> None:
     roles = st.session_state.get("roles") or []
     username = st.session_state.get("username")
-    user_record = get_user_record(config, username)
+    user_record = get_user_record(username)
     allowed_features = user_record.get("allowed_features", [])
 
     st.success(f"Welcome {st.session_state.get('name')}")

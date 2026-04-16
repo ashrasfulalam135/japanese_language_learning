@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-def render_home_page(set_view) -> None:
+def render_home_page() -> None:
     _, center_col, _ = st.columns([1, 1, 1])
     with center_col:
         st.markdown(
@@ -13,4 +13,4 @@ def render_home_page(set_view) -> None:
             key="home_auth_link",
             use_container_width=True,
         ):
-            set_view("login")
+            st.switch_page("auth/login_page.py")

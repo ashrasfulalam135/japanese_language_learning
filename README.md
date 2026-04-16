@@ -1,224 +1,191 @@
-# JLPT Study App 🇯🇵
+# JLPT Study App
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)  
-![Streamlit](https://img.shields.io/badge/Streamlit-1.25-orange?logo=streamlit)  
-![License](https://img.shields.io/badge/License-Personal-green)  
-![Build](https://img.shields.io/github/actions/workflow/status/ashrafulalam135/japanese_language_learning/ci.yml?branch=main)
+Personal Japanese learning platform built with Streamlit.
 
----
+## Overview
 
-## Table of Contents
+The app currently includes:
 
-1. [Project Overview](#project-overview)
-2. [Architecture](#architecture)
-3. [Features](#features)
-4. [Tech Stack](#tech-stack)
-5. [Installation](#installation)
-6. [Database Setup](#database-setup)
-7. [Running the App](#running-the-app)
-8. [Development Workflow](#development-workflow)
-9. [Future Roadmap](#future-roadmap)
-10. [Author](#author)
-11. [License](#license)
+- pre-auth pages for `Home`, `Login`, and `Register`
+- email verification for newly registered users
+- database-backed user storage with SQLite + SQLAlchemy
+- role-based access
+  - `admin` can access all current features
+  - `user` can access only allowed features
+- lesson pages
+  - `Read Lesson`
+  - `Create Lesson` for admin only
 
----
+## Current Routes
 
-## Project Overview
+The app uses Streamlit path-based routing:
 
-**JLPT Study App** is a personal Japanese learning platform built using **Streamlit**.  
-It is designed to prepare for **JLPT exams (N5 → N1)** with:
+- `/`
+- `/login`
+- `/register`
+- `/dashboard`
+- `/read-lesson`
+- `/create-lesson`
 
--   Vocabulary and kanji practice
--   Grammar explanations
--   Conversation and reading exercises
--   Flashcard-based learning
+## Current Structure
 
-**Sprint 1** goal: establish a **professional, scalable environment**.
-
-Completed in Sprint 1:
-
-✔ Project environment setup  
-✔ SQLite database  
-✔ Streamlit app skeleton  
-✔ GitHub repository with CI pipeline  
-✔ Code quality tools (Black, Flake8, pre-commit hooks)  
-✔ Package structure and DB migration setup
-
----
-
-## Architecture
-```
-jlpt-study-app/
-│
-├── app.py                 # Streamlit entry point
-├── config.py              # Environment variables
-├── requirements.txt       # Python dependencies
+```text
+japanese_language_learning/
+├── app.py
+├── config.py
+├── requirements.txt
+├── auth_config.yaml
+├── auth/
+│   ├── db_auth.py
+│   ├── login_page.py
+│   ├── login_view.py
+│   ├── register_page.py
+│   ├── register_view.py
+│   └── verification.py
+├── core/
+│   └── auth_state.py
+├── dashboard/
+│   ├── dashboard_page.py
+│   └── dashboard_view.py
+├── home/
+│   ├── home_page.py
+│   └── home_view.py
+├── lesson_pages/
+│   ├── create_lesson.py
+│   └── read_lesson.py
 ├── database/
-│   ├── db.py              # SQLAlchemy engine/session
-│   ├── models.py          # Base models
-│   └── __init__.py
-├── scripts/
-│   ├── init_db.py         # DB initialization script
-│   └── __init__.py
-├── modules/               # Feature modules (lessons, flashcards, etc.)
-├── auth/                  # Authentication modules (Sprint 2)
-├── pages/                 # Streamlit multi-page content
-├── tests/                 # Unit tests (future)
-└── .github/workflows/     # CI/CD pipeline
+│   ├── db.py
+│   └── models.py
+└── scripts/
+    └── init_db.py
 ```
----
-
-**Flow:**
-
-1. Streamlit runs → `app.py`
-2. Database via SQLAlchemy → `jlpt.db`
-3. Future migrations managed via Alembic
-4. CI pipeline ensures code quality on push
-
----
-
-## Features (Sprint 1)
-
--   ✅ Project skeleton and folder structure
--   ✅ Virtual environment setup
--   ✅ SQLite database initialization
--   ✅ Streamlit “Hello World” page
--   ✅ GitHub repo with CI pipeline
--   ✅ Black code formatter & Flake8 linting
--   ✅ Pre-commit hooks for automated quality checks
-
----
 
 ## Tech Stack
 
-| Layer           | Technology                |
-| --------------- | ------------------------- |
-| Frontend        | Streamlit                 |
-| Backend         | Python 3.11+              |
-| Database        | SQLite                    |
-| ORM             | SQLAlchemy                |
-| Code Quality    | Black, Flake8, pre-commit |
-| Version Control | Git, GitHub               |
-| CI/CD           | GitHub Actions            |
+- Frontend: Streamlit
+- Backend: Python 3.10+
+- Database: SQLite
+- ORM: SQLAlchemy
+- Authentication UI/Session: `streamlit-authenticator`
+- Email: SMTP
 
----
+## Authentication Design
+
+`auth_config.yaml` is now used mainly for cookie/auth app settings and as a bootstrap source for legacy users.
+
+Active user data is stored in the database:
+
+- username
+- email
+- first name
+- last name
+- password hash
+- role
+- allowed features
+- verification token
+- verification expiry
+- verification status
+
+On first run with an empty `users` table, existing users from `auth_config.yaml` are imported into the database.
+
+## Environment Variables
+
+Create a `.env` file in the project root.
+
+Example:
+
+```env
+APP_ENV=dev
+DATABASE_URL=sqlite:///jlpt.db
+
+APP_BASE_URL=http://localhost:8501
+
+SMTP_HOST=sandbox.smtp.mailtrap.io
+SMTP_PORT=2525
+SMTP_USERNAME=your_smtp_username
+SMTP_PASSWORD=your_smtp_password
+SMTP_USE_STARTTLS=true
+EMAIL_FROM=admin@jlpt.local
+
+VERIFICATION_EXPIRY_HOURS=24
+```
 
 ## Installation
 
-### 1. Clone repo
-
 ```bash
 git clone https://github.com/ashrafulalam135/japanese_language_learning.git
-cd jlpt-study-app
-```
-
-### 2. Create virtual environment
-
-```bash
+cd japanese_language_learning
 python -m venv venv
-source venv/bin/activate   # Mac/Linux
-# venv\Scripts\activate    # Windows
-```
-
-### 3. Install dependencies
-
-```bash
+source venv/bin/activate
 pip install -r requirements.txt
 ```
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
 
 ## Database Setup
 
-Initialize SQLite database:
+Initialize the database manually if needed:
 
 ```bash
 python -m scripts.init_db
 ```
 
-Database jlpt.db will be created in the project root.
+This creates the SQLite database and tables.
 
----
-
-## Running the App
-
-Start Streamlit:
+## Run the App
 
 ```bash
 streamlit run app.py
 ```
 
-Open browser:
+Open:
 
-```bash
+```text
 http://localhost:8501
 ```
 
----
+## Current Access Rules
 
-## Development Workflow
+- before login: no sidebar is shown
+- after login: sidebar navigation is shown
+- sidebar includes:
+  - `Dashboard`
+  - `Lesson`
+    - `Read Lesson`
+    - `Create Lesson` for admin only
+  - `Logout`
 
-### Code Formatting
+## Development Notes
+
+- newly registered users are created with role `user`
+- new users must verify their email before login is allowed
+- the app currently uses SQLite locally
+- the DB auth layer was introduced after an earlier YAML-only auth version
+
+## Quality Commands
+
+Format:
 
 ```bash
 black .
 ```
 
-### Linting
-
-```bash
-flake8
-```
-
-### Pre-commit checks
+Run pre-commit:
 
 ```bash
 pre-commit run --all-files
 ```
 
-### CI Pipeline
+## Future Improvements
 
--   GitHub Actions runs on every push to `main`
--   Installs dependencies and checks code formatting & linting
-
----
-
-## Future Roadmap
-
-**Sprint 2** → Authentication & Authorization
-
--   User registration/login
--   Role-based access (Admin/User)
-
-**Sprint 3+** → Learning modules
-
--   Vocabulary, Kanji, Grammar, Flashcards
--   Progress tracking, JLPT-level content
-
-**Long-term goals**
-
--   100–200 users
--   Mobile friendly UI
--   Migration to PostgreSQL
--   Deployment via AWS
--   AI-assisted quiz generation
-
----
+- proper DB migrations with Alembic instead of local schema repair logic
+- forgot password flow
+- admin UI for assigning feature access to users
+- richer lesson management UI
+- PostgreSQL support for deployment
 
 ## Author
 
-**Ashraful Alam**
-
--   ADAS Product Owner & Data Engineer in a japanese car manufacturing company
-
----
+Ashraful Alam
 
 ## License
 
-Personal project – educational purposes only.
+Personal project for learning and development.

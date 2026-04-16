@@ -1,5 +1,6 @@
 import streamlit as st
 
+from auth.db_auth import delete_user, register_user
 from auth.verification import (
     generate_verification_token,
     send_verification_email,
@@ -8,8 +9,36 @@ from auth.verification import (
 
 
 def render_register_view(
-    authenticator, config: dict, get_user_record, set_view
+    authenticator,
+    config: dict,
+    get_user_record,
 ) -> None:
+    st.markdown(
+        """
+        <style>
+        div[data-testid="stForm"] {
+            padding: 1rem;
+        }
+        div[data-testid="stForm"] button[kind="secondaryFormSubmit"],
+        div[data-testid="stForm"] button[kind="primaryFormSubmit"],
+        div[data-testid="stForm"] div[data-testid="stFormSubmitButton"],
+        div[data-testid="stForm"]
+        div[data-testid="stFormSubmitButton"] > button {
+            width: 100%;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<h1 style='text-align: center;'>JLPT Study App</h1>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<h3 style='text-align: center;'>Register</h3>",
+        unsafe_allow_html=True,
+    )
+
     try:
         with st.form("register_form", clear_on_submit=True):
             first_name_col, last_name_col = st.columns(2, gap="small")
@@ -27,7 +56,7 @@ def render_register_view(
                 type="password",
                 autocomplete="off",
             )
-            confirm_password = st.text_input(
+            st.text_input(
                 "Confirm password",
                 type="password",
                 autocomplete="off",
@@ -40,48 +69,37 @@ def render_register_view(
         email_of_registered_user = None
         username_of_registered_user = None
         if register_submitted:
+            verification_token = generate_verification_token()
+            verification_expires_at = verification_expiry_timestamp()
             (
                 email_of_registered_user,
                 username_of_registered_user,
-                _,
-            ) = authenticator.authentication_controller.register_user(
-                new_first_name=first_name,
-                new_last_name=last_name,
-                new_email=email,
-                new_username=email,
-                new_password=password,
-                new_password_repeat=confirm_password,
-                password_hint="",
-                roles=["user"],
-                captcha=False,
+            ) = register_user(
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                password=password,
+                verification_token=verification_token,
+                verification_expires_at=verification_expires_at,
             )
     except Exception as exc:
         st.error(str(exc))
     else:
         if email_of_registered_user:
-            user_record = get_user_record(config, username_of_registered_user)
+            user_record = get_user_record(username_of_registered_user)
             first_name = user_record.get("first_name", "")
-            verification_token = generate_verification_token()
-
-            user_record["roles"] = ["user"]
-            user_record["allowed_features"] = []
-            user_record["verified"] = False
-            user_record["verification_token"] = verification_token
-            verification_expires_at = verification_expiry_timestamp()
-            user_record["verification_expires_at"] = verification_expires_at
 
             try:
                 send_verification_email(
                     recipient_email=email_of_registered_user,
                     first_name=first_name,
-                    token=verification_token,
+                    token=user_record["verification_token"],
                 )
             except Exception as exc:
-                config["credentials"]["usernames"].pop(
-                    username_of_registered_user, None
-                )
+                delete_user(username_of_registered_user)
                 st.error(f"Registration failed: {exc}")
             else:
+                st.session_state.pop("authenticator", None)
                 st.success(
                     f"Account created for {email_of_registered_user}. "
                     "Please verify your email before logging in."
@@ -93,4 +111,4 @@ def render_register_view(
         type="tertiary",
         use_container_width=True,
     ):
-        set_view("login")
+        st.switch_page("auth/login_page.py")

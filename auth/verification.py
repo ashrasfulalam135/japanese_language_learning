@@ -21,10 +21,9 @@ def generate_verification_token() -> str:
     return secrets.token_urlsafe(32)
 
 
-def verification_expiry_timestamp() -> str:
+def verification_expiry_timestamp() -> datetime:
     expiry_delta = timedelta(hours=VERIFICATION_EXPIRY_HOURS)
-    expires_at = datetime.now(timezone.utc) + expiry_delta
-    return expires_at.isoformat()
+    return datetime.now(timezone.utc) + expiry_delta
 
 
 def is_verification_token_valid(user_record: dict, token: str) -> bool:
