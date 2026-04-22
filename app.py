@@ -1,6 +1,6 @@
 import streamlit as st
 
-from core.auth_state import (
+from features.auth.services.session_service import (
     build_authenticator,
     clear_login_state,
     load_auth_config,
@@ -16,38 +16,38 @@ auth_status = st.session_state.get("authentication_status")
 roles = st.session_state.get("roles") or []
 
 home_page = st.Page(
-    "home/home_page.py",
+    "features/home/pages/home.py",
     title="Home",
     url_path="",
     default=True,
     visibility="hidden",
 )
 login_page = st.Page(
-    "auth/login_page.py",
+    "features/auth/pages/login.py",
     title="Login",
     url_path="login",
     visibility="hidden",
 )
 register_page = st.Page(
-    "auth/register_page.py",
+    "features/auth/pages/register.py",
     title="Register",
     url_path="register",
     visibility="hidden",
 )
 dashboard_page = st.Page(
-    "dashboard/dashboard_page.py",
+    "features/dashboard/pages/dashboard.py",
     title="Dashboard",
     url_path="dashboard",
     visibility="hidden",
 )
 read_lesson_page = st.Page(
-    "lesson_pages/read_lesson.py",
+    "features/lessons/pages/read_lesson.py",
     title="Read Lesson",
     url_path="read-lesson",
     visibility="hidden",
 )
 create_lesson_page = st.Page(
-    "lesson_pages/create_lesson.py",
+    "features/lessons/pages/create_lesson.py",
     title="Create Lesson",
     url_path="create-lesson",
     visibility="hidden",
