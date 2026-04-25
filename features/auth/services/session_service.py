@@ -62,6 +62,10 @@ def ensure_user_table_schema() -> None:
     Base.metadata.create_all(bind=engine)
 
 
+def ensure_app_tables() -> None:
+    Base.metadata.create_all(bind=engine)
+
+
 def process_verification_link(config: dict) -> bool:
     token = st.query_params.get("verify_token")
     if not token:
@@ -77,9 +81,32 @@ def process_verification_link(config: dict) -> bool:
     return False
 
 
+def restore_authentication_from_cookie(authenticator) -> None:
+    previous_status = st.session_state.get("authentication_status")
+    previous_username = st.session_state.get("username")
+
+    authenticator.login(location="unrendered")
+
+    current_status = st.session_state.get("authentication_status")
+    current_username = st.session_state.get("username")
+    restored_identity = (current_username, current_status)
+
+    if previous_status is not True and current_status is True:
+        if st.session_state.get("_auth_cookie_restored") != restored_identity:
+            st.session_state["_auth_cookie_restored"] = restored_identity
+            st.rerun()
+        return
+
+    if previous_username != current_username:
+        st.session_state.pop("_auth_cookie_restored", None)
+
+
 def build_authenticator(config: dict):
+    ensure_app_tables()
+
     existing_authenticator = st.session_state.get("authenticator")
     if existing_authenticator is not None:
+        restore_authentication_from_cookie(existing_authenticator)
         return existing_authenticator
 
     ensure_user_table_schema()
@@ -91,7 +118,7 @@ def build_authenticator(config: dict):
         config["cookie"]["expiry_days"],
     )
     st.session_state["authenticator"] = authenticator
-    authenticator.login(location="unrendered")
+    restore_authentication_from_cookie(authenticator)
     return authenticator
 
 
@@ -110,5 +137,18 @@ def require_login(authenticator, config: dict) -> None:
 def require_role(role: str) -> None:
     roles = st.session_state.get("roles") or []
     if role not in roles:
+        st.error("You do not have access to this page.")
+        st.stop()
+
+
+def require_feature(feature_code: str) -> None:
+    roles = st.session_state.get("roles") or []
+    if "admin" in roles:
+        return
+
+    username = st.session_state.get("username")
+    user_record = get_user_record(username)
+    effective_features = user_record.get("effective_features", [])
+    if feature_code not in effective_features:
         st.error("You do not have access to this page.")
         st.stop()

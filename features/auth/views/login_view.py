@@ -7,6 +7,8 @@ def render_login_view(
     get_user_record,
     clear_login_state,
 ) -> None:
+    redirect_url = None
+
     st.markdown(
         """
         <style>
@@ -51,10 +53,31 @@ def render_login_view(
                 email,
                 password,
             ):
+                username = st.session_state.get("username")
+                user_record = get_user_record(username)
+                if not user_record.get("verified", True):
+                    authenticator.logout(location="unrendered")
+                    clear_login_state()
+                    st.warning("Please verify your email before logging in.")
+                    st.stop()
+
                 authenticator.cookie_controller.set_cookie()
-                st.switch_page("features/dashboard/pages/dashboard.py")
+                redirect_url = "/dashboard"
     except Exception as exc:
         st.error(str(exc))
+
+    if redirect_url:
+        st.success("Login successful. Redirecting to dashboard...")
+        st.markdown(
+            '<meta http-equiv="refresh" content="1; url=/dashboard">',
+            unsafe_allow_html=True,
+        )
+        st.link_button(
+            "Continue to dashboard",
+            redirect_url,
+            use_container_width=True,
+        )
+        st.stop()
 
     if st.button(
         "Not a member? Create account",

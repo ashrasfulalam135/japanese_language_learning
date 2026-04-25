@@ -53,6 +53,28 @@ class Feature(Base):
     )
 
 
+class RoleFeature(Base):
+    __tablename__ = "role_features"
+    __table_args__ = (
+        UniqueConstraint("role", "feature_code", name="uq_role_feature_role_code"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    role = Column(String, nullable=False, index=True)
+    feature_code = Column(
+        String,
+        ForeignKey("features.code"),
+        nullable=False,
+        index=True,
+    )
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+
 class Lesson(Base):
     __tablename__ = "lessons"
     __table_args__ = (

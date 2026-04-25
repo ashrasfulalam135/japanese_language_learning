@@ -1,5 +1,6 @@
 import streamlit as st
 
+from features.auth.services.user_service import get_user_record
 from features.auth.services.session_service import (
     build_authenticator,
     clear_login_state,
@@ -14,101 +15,83 @@ process_verification_link(config)
 authenticator = build_authenticator(config)
 auth_status = st.session_state.get("authentication_status")
 roles = st.session_state.get("roles") or []
+user_record = get_user_record(st.session_state.get("username")) if auth_status else {}
+allowed_features = user_record.get("allowed_features", [])
+
+
+def logout():
+    authenticator.logout(location="unrendered")
+    clear_login_state()
+    st.switch_page(home_page)
+
 
 home_page = st.Page(
     "features/home/pages/home.py",
     title="Home",
     url_path="",
     default=True,
-    visibility="hidden",
 )
 login_page = st.Page(
     "features/auth/pages/login.py",
     title="Login",
     url_path="login",
-    visibility="hidden",
 )
 register_page = st.Page(
     "features/auth/pages/register.py",
     title="Register",
     url_path="register",
-    visibility="hidden",
 )
 dashboard_page = st.Page(
     "features/dashboard/pages/dashboard.py",
     title="Dashboard",
     url_path="dashboard",
-    visibility="hidden",
+    icon=":material/dashboard:",
+)
+logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
+role_management_page = st.Page(
+    "features/admin/pages/role_management.py",
+    title="Role Management",
+    url_path="role-management",
+    icon=":material/verified_user:",
 )
 read_lesson_page = st.Page(
     "features/lessons/pages/read_lesson.py",
     title="Read Lesson",
     url_path="read-lesson",
-    visibility="hidden",
+    icon=":material/book:",
 )
 create_lesson_page = st.Page(
     "features/lessons/pages/create_lesson.py",
     title="Create Lesson",
     url_path="create-lesson",
-    visibility="hidden",
+    icon=":material/note_add:",
 )
 
+common_pages = [dashboard_page, logout_page]
+management_pages = [
+    role_management_page,
+]
+lesson_pages = [
+    read_lesson_page,
+    create_lesson_page,
+]
+
+pages = {}
 if auth_status:
     with st.sidebar:
-        st.markdown(
-            """
-            <style>
-            section[data-testid="stSidebar"]
-            div[data-testid="stVerticalBlock"]:first-child {
-                min-height: 100vh;
-            }
-            section[data-testid="stSidebar"]
-            div[data-testid="stVerticalBlock"]:first-child > div {
-                display: flex;
-                flex-direction: column;
-                min-height: 100%;
-            }
-            section[data-testid="stSidebar"] .sidebar-spacer {
-                margin-top: auto;
-                padding-top: 1rem;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.title("Navigation")
-        st.page_link(dashboard_page, label="Dashboard")
-        with st.expander("Lesson", expanded=False):
-            if "admin" in roles:
-                st.page_link(
-                    create_lesson_page,
-                    label="Create Lesson",
-                )
-            st.page_link(
-                read_lesson_page,
-                label="Read Lesson",
-            )
-        st.markdown(
-            '<div class="sidebar-spacer"></div>',
-            unsafe_allow_html=True,
-        )
-        if st.button(
-            "Logout",
-            key="sidebar_logout",
-            use_container_width=True,
-        ):
-            authenticator.logout(location="unrendered")
-            clear_login_state()
-            st.switch_page(home_page)
+        if "user" in roles:
+            pages["Lesson"] = [read_lesson_page]
+        if "admin" in roles:
+            pages["Management"] = management_pages
+            pages["Lesson"] = lesson_pages
 
-navigation = st.navigation(
-    [
-        home_page,
-        login_page,
-        register_page,
-        dashboard_page,
-        read_lesson_page,
-        create_lesson_page,
-    ],
-)
+if len(pages) > 0:
+    navigation = st.navigation(
+        {f"{st.session_state.get('name')}": common_pages} | pages
+    )
+else:
+    navigation = st.navigation(
+        [home_page, login_page, register_page], position="hidden"
+    )
+
 navigation.run()

@@ -6,7 +6,7 @@ from datetime import datetime
 import streamlit_authenticator as stauth
 
 from database.db import SessionLocal
-from database.models import User
+from database.models import RoleFeature, User
 
 
 def _serialize_allowed_features(value: list[str] | None) -> str:
@@ -43,6 +43,13 @@ def get_user_record(username: str | None) -> dict:
             return {}
 
         allowed_features = _deserialize_allowed_features(user.allowed_features)
+        role_features = [
+            feature_code
+            for (feature_code,) in db.query(RoleFeature.feature_code)
+            .filter(RoleFeature.role == user.role)
+            .all()
+        ]
+        effective_features = sorted(set(role_features + allowed_features))
         return {
             "id": user.id,
             "username": user.username,
@@ -51,6 +58,8 @@ def get_user_record(username: str | None) -> dict:
             "last_name": user.last_name,
             "roles": [user.role],
             "allowed_features": allowed_features,
+            "role_features": role_features,
+            "effective_features": effective_features,
             "verified": user.is_verified,
             "verification_token": user.verification_token,
             "verification_expires_at": user.verification_expires_at,
