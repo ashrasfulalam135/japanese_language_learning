@@ -14,8 +14,7 @@ def build_conversation_inputs(count: int) -> list[dict[str, str | int | None]]:
     conversations = []
     for index in range(count):
         line_number = index + 1
-        st.markdown(f"**Conversation {line_number}**")
-        speaker_col, english_col = st.columns([1, 2])
+        speaker_col, english_col = st.columns([1, 3])
         with speaker_col:
             speaker = st.text_input(
                 "Speaker",
@@ -23,23 +22,24 @@ def build_conversation_inputs(count: int) -> list[dict[str, str | int | None]]:
                 placeholder="A",
             )
         with english_col:
-            english = st.text_area(
+            english = st.text_input(
                 "English",
                 key=f"conversation_english_{index}",
                 placeholder="Nice to meet you.",
             )
-
-        romaji_col, kana_col, kanji_col = st.columns(3)
+        _, romaji_col = st.columns([1, 3])
         with romaji_col:
             japanese_romaji = st.text_input(
                 "Romaji",
                 key=f"conversation_romaji_{index}",
             )
+        _, kana_col = st.columns([1, 3])
         with kana_col:
             japanese_kana = st.text_input(
                 "Kana",
                 key=f"conversation_kana_{index}",
             )
+        _, kanji_col = st.columns([1, 3])
         with kanji_col:
             japanese_kanji = st.text_input(
                 "Kanji",
@@ -66,18 +66,7 @@ def build_vocabulary_inputs(count: int) -> list[dict[str, str | int | None]]:
     vocabularies = []
     for index in range(count):
         vocabulary_id = index + 1
-        st.markdown(f"**Vocabulary {vocabulary_id}**")
-        english = st.text_input(
-            "English",
-            key=f"vocabulary_english_{index}",
-            placeholder="I / me",
-        )
-        romaji_col, kana_col, kanji_col = st.columns(3)
-        with romaji_col:
-            japanese_romaji = st.text_input(
-                "Romaji",
-                key=f"vocabulary_romaji_{index}",
-            )
+        kana_col, kanji_col, romaji_col, english_col = st.columns(4)
         with kana_col:
             japanese_kana = st.text_input(
                 "Kana",
@@ -87,6 +76,17 @@ def build_vocabulary_inputs(count: int) -> list[dict[str, str | int | None]]:
             japanese_kanji = st.text_input(
                 "Kanji",
                 key=f"vocabulary_kanji_{index}",
+            )
+        with romaji_col:
+            japanese_romaji = st.text_input(
+                "Romaji",
+                key=f"vocabulary_romaji_{index}",
+            )
+        with english_col:
+            english = st.text_input(
+                "English",
+                key=f"vocabulary_english_{index}",
+                placeholder="I / me",
             )
 
         vocabularies.append(
@@ -119,11 +119,6 @@ def build_grammar_inputs(count: int) -> list[dict[str, str | int | None]]:
             key=f"grammar_explanation_{index}",
             placeholder="Used for polite statements.",
         )
-
-        example_romaji = st.text_input(
-            "Example romaji",
-            key=f"grammar_example_romaji_{index}",
-        )
         example_kana = st.text_input(
             "Example kana",
             key=f"grammar_example_kana_{index}",
@@ -131,6 +126,10 @@ def build_grammar_inputs(count: int) -> list[dict[str, str | int | None]]:
         example_kanji = st.text_input(
             "Example kanji",
             key=f"grammar_example_kanji_{index}",
+        )
+        example_romaji = st.text_input(
+            "Example romaji",
+            key=f"grammar_example_romaji_{index}",
         )
         example_english = st.text_input(
             "Example english",
